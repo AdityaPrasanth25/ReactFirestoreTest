@@ -3,13 +3,13 @@ import parheekshaLogo from './assets/Parheeksha.png';
 import './App.css';
 import { ChangeEvent } from "react";
 import { db } from './config/firebase';
-//import StudentMarks from './StudentMarks';
+import StudentMarks from './StudentMarks';
 import { useEffect } from "react";
-
-import { getDocs,collection,getDoc } from 'firebase/firestore';
-
-
-function StudentMarks(props){
+import HeaderStudent from './HeaderStudent';
+import { getDocs,collection,getDoc,doc } from 'firebase/firestore';
+import StudentDetails from './StudentDetails';
+import UploadExcel from './UploadExcel';
+/*function StudentMarks(props){
     const [studentData, setStudentData] = useState([]);
     const studentCollectionReference = collection(db,"students");
     const usn = props.usn;
@@ -18,15 +18,6 @@ function StudentMarks(props){
     const getStudentData = async () =>{
         
             try{
-                /*const docRef = getDoc(studentCollectionReference,props.usn);
-                const marksRef = collection(docRef,"Marks");
-                const data = await getDocs(marksRef);
-                const filteredData = data.docs.map((doc) => ({
-                    ...doc.data(),
-                    id: doc.id,
-                } ));*/
-                /*const colRef = collection(db,"students");
-                const docRef = getDoc(colRef,usn);*/
                 const subColRef = collection(db,'students','1BY20CS011','Marks');
                 const dataSubCol = await getDocs(subColRef);
                 const filteredDataSub = dataSubCol.docs.map((doc) => ({
@@ -47,20 +38,23 @@ function StudentMarks(props){
     return(
         <div className="marksTable">
           <p>Details :::</p>
-          
+          <table>
+            <tr><th>Course Code</th><th>Course Name</th><th>IA1</th><th>IA2</th><th>IA2</th></tr>
           {studentData.map((course) => (
-            <div>
-              <p>{course['id']}</p>
-              <p>{course['IA1']}</p>
-              <p>{course['IA2']}</p>
-              <p>{course['IA3']}</p>
-              {/* Add other content here */}
-            </div>
+            <tr>
+              <td>{course['id']}</td>
+              <td>{course['Course-Name']}</td>
+              <td>{course['IA1']}</td>
+              <td>{course['IA2']}</td>
+              <td>{course['IA3']}</td>
+            </tr>
+            
           ))}
+          </table>
         </div>
     );
-}
-function Header(){
+}*/
+/*function Header(){
   return(
     <div>
       <header id="header">
@@ -74,26 +68,104 @@ function Header(){
 		</nav></header>
      </div>
   );
-}
+}*/
+/*
 function StudentDetails(props){
-  const arrUsns = ['1BY20CS011','1BY20CS012','1BY20CS014','1BY20CS032'];
-  const arrNames = ['Aditya Prasanth','Aditya Singh','Ahobilesha','Asrith V P'];
-  if(props.usn.length==10 && arrUsns.includes(props.usn)){
+  const [studentName, setStudentName] = useState([]);
+  let flag = 0;
+  //const arrUsns = ['1BY20CS011','1BY20CS012','1BY20CS014','1BY20CS032'];
+  //const arrNames = ['Aditya Prasanth','Aditya Singh','Ahobilesha','Asrith V P'];
+  const usnOfStudent = props.usn;
+  console.log(usnOfStudent);
+  useEffect(()=>{
+      const getStudentName = async()=>{
+        const docRef = doc(db,"students",usnOfStudent);
+       
+        try {
+          const docSnap = await getDoc(docRef);
+          if(docSnap.exists()) {
+              console.log("DocSnap data: ",docSnap.data());
+              setStudentName(docSnap.data());
+              console.log("StudentName: ",studentName);
+              flag=1;
+          } else {
+              console.log("Document does not exist")
+              //flag=0;            
+          }
+      
+      } catch(error) {
+          console.log(error)
+      }
+    }
+    getStudentName();
+  },[]);
+  if(flag==1){
     return(
-      <div className="App">
+      <div className="studentDetails">
           <p>Usn : {props.usn}</p>
-          <p>Name : {arrNames[arrUsns.indexOf(props.usn)]}</p>
-          <StudentMarks/>
+          <p>Name : {docSnap['Student-Name']}</p>
+          <StudentMarks usn={props.usn} />
       </div>
     );
   }
+  else{
   return(
-<div className="App">
-  <p>USN not found.</p>
-</div>
+    <div >
+      <p>USN not found.</p>
+    </div>
   );
+  }
+}*/
+//import { useState, useEffect } from 'react';
+//import { doc, getDoc } from 'firebase/firestore'; // Import Firestore functions as needed
+/*Proper one
+function StudentDetails(props) {
+  const [studentDetails, setStudentDetails] = useState(null);
 
-}
+  const usnOfStudent = props.usn; // Fix casing of 'usn'
+
+  useEffect(() => {
+    const getStudentName = async () => {
+      const docRef = doc(db, "students", usnOfStudent);
+
+      try {
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          console.log("DocSnap data: ", docSnap.data());
+          setStudentDetails(docSnap.data());
+           // Update state with student details
+        } else {
+          console.log("Document does not exist");
+          setStudentDetails(null); // Clear student details
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    getStudentName();
+  }, [usnOfStudent]); // Add usnOfStudent to the dependency array
+  console.log("StudentName data:",studentDetails)
+  if (studentDetails) {
+    return (
+      <div className="studentDetails">
+        <p>Usn : {usnOfStudent}</p>
+        <p>Name : {studentDetails['Student-Name']}</p>
+        <StudentMarks usn={usnOfStudent} />
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <p>USN not found.</p>
+      </div>
+    );
+  }
+}*/
+
+//export default StudentDetails;
+
+
 function SearchStudent(){
   const [inputText, setInputText] = useState("");
 
@@ -105,20 +177,19 @@ function SearchStudent(){
     <div>
       <label>Enter USN of the student: </label>
       <input type="text" onChange={handleChange} value={inputText} />
-      <StudentDetails usn ={inputText}/>
+      {inputText.length == 10?<StudentDetails usn ={inputText}/>:<p>Invalid USN Format</p>}
     </div>
   );
-
 };
 function App() {
   const [count, setCount] = useState(0);
 
   return (
     <>
-    <Header/>
+    <HeaderStudent/>
     <p className='student-details-heading'>Student Details</p>
     <SearchStudent/>
-   
+    <UploadExcel/>
     </>
   );
 }
